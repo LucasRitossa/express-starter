@@ -1,0 +1,66 @@
+<!-- add canvas for chart to sit in -->
+<canvas id="myChart" width="400" height="400"></canvas>
+<!-- create button that execute api request on click -->
+<button onclick="fetchData()">fetch new data</button>
+<script src=" https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    const apiUrl = 'https://datausa.io/api/data?drilldowns=Nation&measures=Population'
+
+    // needs to be async becuase we are going to wait for data
+    async function fetchData() {
+        // create get request with apiUrl and await response
+        const response = await fetch(apiUrl)
+        // request returned status code 200 (success)
+        if (response.ok) {
+            let res = await response.json();
+            // loop through api response from back to front
+            for (let i = res.data.length - 1; i > 0; i--) {
+                // push new year data to column names
+                myChart.data.labels.push(res.data[i]['ID Year'])
+                // push new population dataset into columns
+                myChart.data.datasets.forEach(dataset => {
+                    dataset.data.push(res.data[i].Population)
+                })
+            }
+            //update chart element
+            myChart.update();
+        } else {
+            alert("error retrieving data:", response.status)
+        }
+    }
+    // initialize chart element
+    const ctx = document.getElementById('myChart');
+    const myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            datasets: [{
+                label: 'population in USA over time',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+</script>
